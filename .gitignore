@@ -1,0 +1,42 @@
+# Android Studio / IntelliJ
+*.iml
+/.idea/caches/
+/.idea/libraries/
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+/.idea/shelf/
+/.idea/deploymentTargetSelector.xml
+/.idea/deviceManager.xml
+
+# Gradle
+.gradle/
+**/build/
+
+# Local Android configuration
+local.properties
+/captures/
+.externalNativeBuild/
+.cxx/
+
+# Signing keys
+*.jks
+*.keystore
+*.p12
+
+# Environment files
+.env
+.env.*
+*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak
