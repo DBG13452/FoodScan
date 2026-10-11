@@ -27,7 +27,7 @@ fun FoodScanScreenColumn(
             modifier = Modifier.widthIn(max = 640.dp).fillMaxWidth()
                 .verticalScroll(rememberScrollState())
                 .padding(FoodScanSpacing.screen),
-            verticalArrangement = Arrangement.spacedBy(FoodScanSpacing.large),
+            verticalArrangement = Arrangement.spacedBy(FoodScanSpacing.extraLarge),
             content = content,
         )
     }
