@@ -4,16 +4,11 @@
     <string name="nav_scanner">Сканирование</string>
     <string name="nav_favorites">Избранное</string>
     <string name="nav_profile">Профиль</string>
-    <string name="home_tagline">Узнайте больше о том, что едите</string>
     <string name="scenario_title">Ваш сценарий питания</string>
-    <string name="scenario_normal">Обычное питание · NORMAL</string>
-    <string name="scenario_description">Общий пищевой профиль продуктов</string>
+    <string name="scenario_normal">Обычное питание</string>
     <string name="open_profile">Открыть профиль</string>
     <string name="scan_product">Сканировать продукт</string>
-    <string name="scan_description">Состав и пищевая ценность — по штрихкоду</string>
     <string name="recent_title">Недавно просмотренные</string>
-    <string name="recent_demo_note">Демонстрационные примеры. Реальная история просмотров пока не сохраняется.</string>
-    <string name="demo_product_label">Демо-продукт</string>
     <string name="demo_oatmeal">Овсяные хлопья</string>
     <string name="demo_oatmeal_category">Крупы и злаки</string>
     <string name="demo_yogurt">Натуральный йогурт</string>
@@ -33,6 +28,4 @@
     <string name="profile_title">Ваш профиль питания</string>
     <string name="profile_placeholder_title">Настройки скоро появятся</string>
     <string name="profile_placeholder_message">Сейчас выбран сценарий «Обычное питание». Выбор других сценариев и сохранение настроек пока недоступны.</string>
-    <string name="about_title">О FoodScan</string>
-    <string name="about_message">FoodScan — информационный сервис о пищевых продуктах. Он не ставит диагнозы и не заменяет консультацию специалиста.</string>
 </resources>

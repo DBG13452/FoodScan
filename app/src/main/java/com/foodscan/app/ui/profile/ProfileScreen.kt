@@ -29,9 +29,5 @@ fun ProfileScreen(modifier: Modifier = Modifier) {
             message = stringResource(R.string.profile_placeholder_message),
             modifier = Modifier.fillMaxWidth(),
         )
-        FoodScanCard(Modifier.fillMaxWidth()) {
-            FoodScanSectionTitle(stringResource(R.string.about_title))
-            Text(stringResource(R.string.about_message), style = MaterialTheme.typography.bodyMedium)
-        }
     }
 }

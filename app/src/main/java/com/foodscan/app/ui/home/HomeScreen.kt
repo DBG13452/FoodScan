@@ -1,10 +1,15 @@
 package com.foodscan.app.ui.home
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -18,6 +23,7 @@ import com.foodscan.app.ui.components.FoodScanMessage
 import com.foodscan.app.ui.components.FoodScanScreenColumn
 import com.foodscan.app.ui.components.FoodScanSectionTitle
 import com.foodscan.app.ui.theme.FoodScanTheme
+import com.foodscan.app.ui.theme.FoodScanSpacing
 
 @Composable
 fun HomeScreen(
@@ -33,38 +39,11 @@ fun HomeScreen(
             style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.primary,
         )
-        Text(
-            text = stringResource(R.string.home_tagline),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        FoodScanCard(Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.scenario_title), style = MaterialTheme.typography.labelLarge)
-            Text(
-                stringResource(R.string.scenario_normal),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Text(
-                stringResource(R.string.scenario_description),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            FoodScanButton(
-                text = stringResource(R.string.open_profile),
-                onClick = onProfile,
-                style = FoodScanButtonStyle.Text,
-            )
-        }
+        NutritionScenarioCard(onProfile = onProfile)
         FoodScanButton(
             text = stringResource(R.string.scan_product),
             onClick = onScan,
             modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
-        )
-        Text(
-            stringResource(R.string.scan_description),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         FoodScanSectionTitle(stringResource(R.string.recent_title))
         if (recentProducts.isEmpty()) {
@@ -74,18 +53,8 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth(),
             )
         } else {
-            Text(
-                stringResource(R.string.recent_demo_note),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
             recentProducts.forEach { product ->
                 FoodScanCard(Modifier.fillMaxWidth()) {
-                    Text(
-                        stringResource(R.string.demo_product_label),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
                     Text(stringResource(product.name), style = MaterialTheme.typography.titleMedium)
                     Text(
                         stringResource(product.category),
@@ -101,6 +70,34 @@ fun HomeScreen(
             modifier = Modifier.fillMaxWidth(),
             style = FoodScanButtonStyle.Secondary,
         )
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun NutritionScenarioCard(onProfile: () -> Unit) {
+    FoodScanCard(Modifier.fillMaxWidth()) {
+        // Keep one compact row when possible; wrap instead of clipping at large font sizes.
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalArrangement = Arrangement.spacedBy(FoodScanSpacing.extraSmall),
+        ) {
+            Text(
+                text = stringResource(R.string.scenario_normal),
+                modifier = Modifier.align(androidx.compose.ui.Alignment.CenterVertically),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            TextButton(
+                onClick = onProfile,
+                modifier = Modifier.heightIn(min = FoodScanSpacing.buttonMinHeight),
+                shape = MaterialTheme.shapes.medium,
+                contentPadding = PaddingValues(FoodScanSpacing.small),
+            ) {
+                Text(stringResource(R.string.open_profile))
+            }
+        }
     }
 }
 
