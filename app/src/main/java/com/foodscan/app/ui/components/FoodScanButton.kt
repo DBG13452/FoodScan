@@ -2,6 +2,9 @@ package com.foodscan.app.ui.components
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.Alignment
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -22,6 +25,7 @@ fun FoodScanButton(
     modifier: Modifier = Modifier,
     style: FoodScanButtonStyle = FoodScanButtonStyle.Primary,
     enabled: Boolean = true,
+    leadingIcon: (@Composable () -> Unit)? = null,
 ) {
     val buttonModifier = modifier.heightIn(min = FoodScanSpacing.buttonMinHeight)
     val padding = PaddingValues(
@@ -29,7 +33,11 @@ fun FoodScanButton(
         vertical = FoodScanSpacing.medium,
     )
     val label: @Composable () -> Unit = {
-        Text(text = text, textAlign = TextAlign.Center)
+        Row(verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(FoodScanSpacing.small)) {
+            leadingIcon?.invoke()
+            Text(text = text, textAlign = TextAlign.Center)
+        }
     }
     when (style) {
         FoodScanButtonStyle.Primary -> Button(

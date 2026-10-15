@@ -20,11 +20,15 @@ object FoodScanPalette {
     val ErrorText = Color(0xFFA12626)
     val ErrorContainer = Color(0xFFFDECEC)
     val WarningContainer = Color(0xFFFFF5DE)
+    val WarningText = Color(0xFF855000)
+    val SuccessText = Color(0xFF17633F)
     val InverseText = Color(0xFFF1F5F2)
 }
 
 /** Material 3 has no success / warning roles. */
 object FoodScanColors {
+    val successText = FoodScanPalette.SuccessText
+    val warningText = FoodScanPalette.WarningText
     val success = FoodScanPalette.Success
     val successContainer = FoodScanPalette.BrandSoft
     val warning = FoodScanPalette.Warning

@@ -4,7 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.foodscan.app.R
 
-/** Only four fixed routes; no arguments or serialization plugin are needed yet. */
+/** The four top-level tabs. Product details have a separate route with an ID argument. */
 enum class FoodScanDestination(
     val route: String,
     @param:StringRes val label: Int,

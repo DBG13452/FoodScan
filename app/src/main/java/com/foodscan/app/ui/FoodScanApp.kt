@@ -15,7 +15,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import com.foodscan.app.data.AppContainer
+import com.foodscan.app.data.AppServices
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -25,14 +32,19 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.foodscan.app.navigation.FoodScanDestination
 import com.foodscan.app.navigation.FoodScanNavHost
+import com.foodscan.app.navigation.ProductDestination
 import com.foodscan.app.navigation.navigateTo
 import com.foodscan.app.ui.theme.FoodScanTheme
 
 @Composable
-fun FoodScanApp() {
+fun FoodScanApp(services: AppContainer = AppServices.get(LocalContext.current)) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = backStackEntry?.destination?.route
+    val route = backStackEntry?.destination?.route
+    var lastTab by rememberSaveable { mutableStateOf(FoodScanDestination.Home.route) }
+    val tabRoute = route?.takeIf { value -> FoodScanDestination.entries.any { it.route == value } }
+    LaunchedEffect(tabRoute) { if (tabRoute != null) lastTab = tabRoute }
+    val currentRoute = tabRoute ?: lastTab
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -71,6 +83,7 @@ fun FoodScanApp() {
     ) { innerPadding ->
         FoodScanNavHost(
             navController = navController,
+            services = services,
             modifier = Modifier.fillMaxSize().padding(innerPadding)
                 .consumeWindowInsets(innerPadding),
         )
