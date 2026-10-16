@@ -25,6 +25,7 @@ import com.foodscan.app.ui.components.FoodScanButtonStyle
 import com.foodscan.app.ui.components.FoodScanCard
 import com.foodscan.app.ui.components.FoodScanSectionTitle
 import com.foodscan.app.ui.theme.FoodScanSpacing
+import com.foodscan.app.ui.theme.FoodScanColors
 import kotlin.math.round
 
 @Composable
@@ -44,6 +45,7 @@ private fun factorLabel(factor: ScoreFactor): String = stringResource(when (fact
     ScoreFactor.PROTEIN -> R.string.product_protein
     ScoreFactor.ENERGY -> R.string.product_energy
     ScoreFactor.CARBOHYDRATES -> R.string.product_carbohydrate
+    ScoreFactor.FAT -> R.string.product_fat
 })
 
 @Composable
@@ -54,18 +56,37 @@ fun ProductScoreCard(product: Product, scenario: NutritionScenario, onMethodolog
         FoodScanSectionTitle(stringResource(R.string.product_score))
         when (score) {
             is ProductScore.Rated -> {
+                if (score.preliminary) Text(stringResource(R.string.score_preliminary),
+                    style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text("${score.value} / 100", style = MaterialTheme.typography.headlineLarge,
-                    color = MaterialTheme.colorScheme.primary)
+                    color = when {
+                        score.value < 40 -> MaterialTheme.colorScheme.error
+                        score.value < 70 -> FoodScanColors.warningText
+                        else -> FoodScanColors.successText
+                    })
+                Text(stringResource(R.string.score_coverage, score.contributions.size, score.totalFactors),
+                    style = MaterialTheme.typography.titleMedium)
+                if (score.generalScale) Text(stringResource(R.string.score_general_scale),
+                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (score.missing.isNotEmpty()) {
+                    Text(stringResource(R.string.score_missing, score.missing.map { factorLabel(it) }.joinToString(", ")),
+                        style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
                 FoodScanButton(stringResource(if (expanded) R.string.score_hide_details else R.string.score_explain),
                     { expanded = !expanded }, style = FoodScanButtonStyle.Text)
                 if (expanded) {
+                    if (score.preliminary) {
+                        Text(stringResource(R.string.score_partial_explanation, score.coveredWeight),
+                            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                     score.contributions.forEach { contribution ->
                         val unit = stringResource(if (contribution.factor == ScoreFactor.ENERGY) R.string.product_kcal else R.string.product_grams)
                         val actual = formatNutrient(contribution.value, unit, "")
-                        val points = formatNutrient(round(contribution.points * 10) / 10, "", "").trim()
+                        val points = formatNutrient(round(score.normalizedPoints(contribution) * 10) / 10, "", "").trim()
                         Column(verticalArrangement = Arrangement.spacedBy(FoodScanSpacing.extraSmall)) {
-                            Text("${factorLabel(contribution.factor)}: $actual", style = MaterialTheme.typography.titleSmall)
-                            Text(stringResource(R.string.score_points, points, contribution.weight), style = MaterialTheme.typography.bodyMedium)
+                            Text("${factorLabel(contribution.factor)}: $actual", style = MaterialTheme.typography.titleLarge)
+                            val weight = formatNutrient(round(score.normalizedWeight(contribution) * 10) / 10, "", "").trim()
+                            Text(stringResource(R.string.score_points_v2, points, weight), style = MaterialTheme.typography.bodyLarge)
                         }
                     }
                 }

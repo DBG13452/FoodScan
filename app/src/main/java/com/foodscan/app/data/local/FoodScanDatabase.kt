@@ -12,6 +12,8 @@ import androidx.room.Query
 import androidx.room.RoomDatabase
 import androidx.room.Transaction
 import androidx.room.Upsert
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.flow.Flow
 
 @Entity(tableName = "products")
@@ -22,7 +24,7 @@ data class StoredProduct(@PrimaryKey val id: String, val payload: String)
 )])
 data class FavoriteEntry(@PrimaryKey val productId: String, val savedAt: Long)
 
-@Entity(tableName = "history", indices = [Index("productId"), Index("viewedAt")], foreignKeys = [ForeignKey(
+@Entity(tableName = "history", indices = [Index(value = ["productId"], unique = true), Index("viewedAt")], foreignKeys = [ForeignKey(
     entity = StoredProduct::class, parentColumns = ["id"], childColumns = ["productId"], onDelete = ForeignKey.CASCADE,
 )])
 data class HistoryEntry(
@@ -38,6 +40,8 @@ abstract class LibraryDao {
     @Upsert abstract suspend fun saveProduct(product: StoredProduct)
     @Insert(onConflict = OnConflictStrategy.IGNORE) abstract suspend fun addFavorite(entry: FavoriteEntry)
     @Insert abstract suspend fun addHistory(entry: HistoryEntry)
+    @Query("UPDATE history SET viewedAt = :viewedAt WHERE productId = :productId")
+    abstract suspend fun updateHistory(productId: String, viewedAt: Long): Int
     @Query("SELECT * FROM products WHERE id = :id") abstract suspend fun product(id: String): StoredProduct?
     @Query("SELECT EXISTS(SELECT 1 FROM favorites WHERE productId = :id)") abstract fun isFavorite(id: String): Flow<Boolean>
     @Query("SELECT products.* FROM products JOIN favorites ON products.id = favorites.productId ORDER BY savedAt DESC, products.id")
@@ -54,7 +58,9 @@ abstract class LibraryDao {
 
     @Transaction open suspend fun recordView(product: StoredProduct, viewedAt: Long, recordHistory: Boolean) {
         saveProduct(product)
-        if (recordHistory) addHistory(HistoryEntry(productId = product.id, viewedAt = viewedAt))
+        if (recordHistory && updateHistory(product.id, viewedAt) == 0) {
+            addHistory(HistoryEntry(productId = product.id, viewedAt = viewedAt))
+        }
         removeOrphans()
     }
     @Transaction open suspend fun setFavorite(product: StoredProduct, selected: Boolean, time: Long) {
@@ -67,5 +73,22 @@ abstract class LibraryDao {
     @Transaction open suspend fun clearAll() { clearHistoryRows(); clearFavoriteRows(); clearProducts() }
 }
 
-@Database(entities = [StoredProduct::class, FavoriteEntry::class, HistoryEntry::class], version = 1, exportSchema = true)
-abstract class FoodScanDatabase : RoomDatabase() { abstract fun library(): LibraryDao }
+@Database(entities = [StoredProduct::class, FavoriteEntry::class, HistoryEntry::class], version = 2, exportSchema = true)
+abstract class FoodScanDatabase : RoomDatabase() {
+    abstract fun library(): LibraryDao
+
+    companion object {
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Keep the most recent scan, with a deterministic winner for equal timestamps.
+                // Product snapshots and favorites are unaffected.
+                db.execSQL("""DELETE FROM history WHERE EXISTS (
+                    SELECT 1 FROM history AS newer WHERE newer.productId = history.productId
+                    AND (newer.viewedAt > history.viewedAt OR
+                        (newer.viewedAt = history.viewedAt AND newer.eventId > history.eventId)))""")
+                db.execSQL("DROP INDEX IF EXISTS index_history_productId")
+                db.execSQL("CREATE UNIQUE INDEX index_history_productId ON history (productId)")
+            }
+        }
+    }
+}

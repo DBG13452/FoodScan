@@ -12,7 +12,8 @@ import kotlinx.coroutines.withContext
 
 class AppContainer(context: Context, database: FoodScanDatabase? = null, settings: UserSettings? = null) {
     private val appContext = context.applicationContext
-    private val database = database ?: Room.databaseBuilder(appContext, FoodScanDatabase::class.java, "foodscan.db").build()
+    private val database = database ?: Room.databaseBuilder(appContext, FoodScanDatabase::class.java, "foodscan.db")
+        .addMigrations(FoodScanDatabase.MIGRATION_1_2).build()
     val library = UserLibrary(this.database.library())
     val settings = settings ?: UserSettings(appContext)
     @OptIn(coil.annotation.ExperimentalCoilApi::class)

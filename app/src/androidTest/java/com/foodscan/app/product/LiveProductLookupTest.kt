@@ -53,4 +53,24 @@ class LiveProductLookupTest {
         compose.onNodeWithText("Назад").performScrollTo().performClick()
         compose.onNodeWithText("Штрихкод").assertIsDisplayed()
     }
+
+    @Test fun reportedRamenLoadsWithIngredientAllergens() {
+        assumeTrue(InstrumentationRegistry.getArguments().getString("liveApi") == "true")
+        compose.runOnUiThread { compose.activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
+        compose.setContent { FoodScanTheme { FoodScanApp(services = environment.services) } }
+        compose.onNodeWithText("Сканировать продукт").performClick()
+        compose.onNodeWithText("Штрихкод").performTextReplacement("4607065580728")
+        compose.onNodeWithText("Найти продукт").performScrollTo().performClick()
+        compose.waitUntil(35_000) {
+            compose.onAllNodesWithText("Cheese", substring = true).fetchSemanticsNodes().isNotEmpty()
+        }
+        // Do not freeze the live API's nutrient coverage in a test; the deterministic test does that.
+        compose.onNodeWithText("Оценка продукта").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Молоко, Глютен, Соя").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Возможны следы: Рыба, Ракообразные, Моллюски").performScrollTo().assertIsDisplayed()
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        File(context.getExternalFilesDir(null), "ramen-live-v2.png").outputStream().use {
+            compose.onRoot().captureToImage().asAndroidBitmap().compress(Bitmap.CompressFormat.PNG, 100, it)
+        }
+    }
 }

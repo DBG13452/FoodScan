@@ -17,6 +17,12 @@ internal fun OffProductDto.toProduct(requestedBarcode: String): Product {
         }?.takeIf { it.isFinite() && it >= 0 }
     }
 
+    // OFF normalized energy is kJ and sodium is grams, irrespective of input units.
+    // Prefer the reported kcal / salt; equivalent measurements are fallbacks, not
+    // additional factors (which would count the same information twice).
+    val energyKcal = nutrient("energy-kcal") ?: (nutrient("energy-kj") ?: nutrient("energy"))?.div(4.184)
+    val saltGrams = nutrient("salt") ?: nutrient("sodium")?.times(2.5)
+
     // OFF _100g values may mean 100 ml. Do not guess the basis from a product name.
     val declaredUnit = quantityUnit?.lowercase(Locale.ROOT) ?: quantity?.let {
         Regex("(?:\\d[\\d.,]*\\s*)(kg|mg|ml|cl|dl|g|l|кг|мг|мл|г|л)\\s*$", RegexOption.IGNORE_CASE)
@@ -39,10 +45,10 @@ internal fun OffProductDto.toProduct(requestedBarcode: String): Product {
         barcode = code.clean() ?: requestedBarcode,
         nutrition = Nutrition(
             basis = basis,
-            energyKcal = nutrient("energy-kcal"),
+            energyKcal = energyKcal,
             proteinGrams = nutrient("proteins"), fatGrams = nutrient("fat"),
             carbohydrateGrams = nutrient("carbohydrates"), sugarGrams = nutrient("sugars"),
-            saltGrams = nutrient("salt"), saturatedFatGrams = nutrient("saturated-fat"),
+            saltGrams = saltGrams, saturatedFatGrams = nutrient("saturated-fat"),
             fiberGrams = nutrient("fiber"),
         ),
         ingredients = russianIngredients.clean() ?: ingredients.clean(),

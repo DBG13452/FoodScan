@@ -66,7 +66,7 @@ class StoragePersistenceTest {
             library.recordView(product, true)
             val first = library.history.first().first()
             library.deleteHistory(first.eventId)
-            assertEquals(1, library.history.first().size)
+            assertTrue(library.history.first().isEmpty())
             library.clearAll()
             preferences.reset()
             assertTrue(library.history.first().isEmpty())

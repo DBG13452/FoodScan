@@ -98,6 +98,7 @@ fun ProductScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             }
+            ProductScoreCard(product, scenario, onMethodology)
             FoodScanCard(Modifier.fillMaxWidth()) {
                 if (product.source == ProductSource.OPEN_FOOD_FACTS) {
                     ProductField(stringResource(R.string.product_brands), product.brands.orNoData())
@@ -119,7 +120,6 @@ fun ProductScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
-            ProductScoreCard(product, scenario, onMethodology)
             Column(verticalArrangement = Arrangement.spacedBy(FoodScanSpacing.medium)) {
                 FoodScanSectionTitle(stringResource(R.string.product_nutrition))
                 Text(stringResource(when (product.nutrition.basis) {
@@ -142,7 +142,7 @@ fun ProductScreen(
                 }
             }
             ProductSection(stringResource(R.string.product_ingredients), product.ingredients.orNoData())
-            ProductSection(stringResource(R.string.product_allergens), product.allergens.asSourceList())
+            ProductAllergens(product)
             if (!product.additives.isNullOrEmpty()) {
                 Column(verticalArrangement = Arrangement.spacedBy(FoodScanSpacing.small)) {
                     FoodScanSectionTitle(stringResource(R.string.product_additives))
@@ -168,7 +168,7 @@ private fun List<String>?.asSourceList(): String = when {
 
 @Composable
 private fun ProductSection(title: String, text: String) {
-    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(FoodScanSpacing.small)) {
+    FoodScanCard(Modifier.fillMaxWidth()) {
         FoodScanSectionTitle(title)
         Text(text, style = MaterialTheme.typography.bodyLarge)
     }
@@ -176,7 +176,7 @@ private fun ProductSection(title: String, text: String) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ProductField(label: String, value: String, modifier: Modifier = Modifier) {
+private fun ProductField(label: String, value: String, modifier: Modifier = Modifier, emphasized: Boolean = false) {
     // Values wrap onto the next line instead of fighting the label for fixed columns.
     FlowRow(
         modifier.fillMaxWidth().semantics(mergeDescendants = true) {},
@@ -184,7 +184,7 @@ private fun ProductField(label: String, value: String, modifier: Modifier = Modi
         verticalArrangement = Arrangement.spacedBy(FoodScanSpacing.extraSmall),
     ) {
         Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(value, style = MaterialTheme.typography.titleSmall)
+        Text(value, style = if (emphasized) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleSmall)
     }
 }
 
@@ -194,6 +194,7 @@ private fun NutrientRow(label: Int, value: Double?, unit: Int = R.string.product
         stringResource(label),
         formatNutrient(value, stringResource(unit), stringResource(R.string.product_no_data)),
         Modifier.padding(vertical = FoodScanSpacing.extraSmall).testTag("nutrition-$tag"),
+        emphasized = value != null,
     )
 }
 

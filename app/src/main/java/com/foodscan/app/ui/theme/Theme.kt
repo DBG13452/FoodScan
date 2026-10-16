@@ -38,7 +38,7 @@ private val FoodScanLightColorScheme = lightColorScheme(
     surfaceDim = FoodScanPalette.Border,
     surfaceContainerLowest = FoodScanPalette.Surface,
     surfaceContainerLow = FoodScanPalette.Background,
-    surfaceContainer = FoodScanPalette.Background,
+    surfaceContainer = FoodScanPalette.BlockSurface,
     surfaceContainerHigh = FoodScanPalette.BrandSoft,
     surfaceContainerHighest = FoodScanPalette.Border,
 )

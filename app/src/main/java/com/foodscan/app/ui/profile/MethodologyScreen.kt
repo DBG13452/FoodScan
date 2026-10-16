@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import com.foodscan.app.R
+import com.foodscan.app.domain.scoring.ScoringEngine
 import com.foodscan.app.ui.components.FoodScanBackButton
 import com.foodscan.app.ui.components.FoodScanButton
 import com.foodscan.app.ui.components.FoodScanButtonStyle
@@ -18,7 +19,7 @@ fun MethodologyScreen(onBack: () -> Unit) {
     val uriHandler = LocalUriHandler.current
     FoodScanScreenColumn {
         FoodScanBackButton(onBack)
-        FoodScanScreenTitle(stringResource(R.string.score_methodology), "FoodScan v1")
+        FoodScanScreenTitle(stringResource(R.string.score_methodology), ScoringEngine.VERSION)
         Text(stringResource(R.string.method_intro), style = MaterialTheme.typography.bodyLarge)
         FoodScanSectionTitle(stringResource(R.string.method_thresholds))
         Text(stringResource(R.string.method_thresholds_text), style = MaterialTheme.typography.bodyLarge)

@@ -9,6 +9,7 @@ object FoodScanPalette {
     val BrandSoft = Color(0xFFE8F7EE)
     val Background = Color(0xFFFAFBF8)
     val Surface = Color(0xFFFFFFFF)
+    val BlockSurface = Color(0xFFF0F5F1)
     val TextPrimary = Color(0xFF17201D)
     val TextSecondary = Color(0xFF66736D)
     val Border = Color(0xFFE2E9E5)

@@ -110,4 +110,54 @@ class OpenFoodFactsRepositoryTest {
             fail("Cancellation must propagate")
         } catch (_: CancellationException) { }
     }
+
+    @Test fun ramenMappingKeepsMissingTotalsSeparateFromEstimatedAddedSugar() {
+        val mapped = Gson().fromJson("""{
+            "product_name":"Cheese рамен", "categories":"Instant noodles", "product_quantity_unit":"g",
+            "allergens_tags":["en:milk"], "traces_tags":[],
+            "ingredients_text_ru":"Содержит глютен, молоко, сою и следы рыбы, ракообразных, моллюсков.",
+            "nutriments":{"energy-kcal_100g":418,"proteins_100g":9.5,"fat_100g":12,"carbohydrates_100g":68,
+                "added-sugars_100g":0.4827,"added-sugars_modifier":"~"}
+        }""", OffProductDto::class.java).toProduct("4607065580728")
+        assertNull(mapped.nutrition.sugarGrams)
+        assertNull(mapped.nutrition.saltGrams)
+        assertEquals(29, (com.foodscan.app.domain.scoring.ScoringEngine.evaluate(mapped,
+            com.foodscan.app.domain.model.NutritionScenario.NORMAL) as com.foodscan.app.domain.scoring.ProductScore.Rated).value)
+        val summary = com.foodscan.app.domain.allergens.AllergenAnalyzer.analyze(mapped)
+        assertEquals(setOf("Глютен", "Молоко", "Соя"), summary.contains.map { it.name }.toSet())
+        assertEquals(setOf("Рыба", "Ракообразные", "Моллюски"), summary.traces.map { it.name }.toSet())
+    }
+
+    @Test fun reportedYogurtWithoutPackageQuantityStillUsesAllFiveMeasurements() {
+        val mapped = Gson().fromJson("""{
+            "code":"4690228106903", "product_name":"Йогурт Чудо", "categories":"Yogurts",
+            "nutrition_data_per":"100g", "categories_tags":["en:dairies","en:yogurts"],
+            "nutriments":{"energy-kcal_100g":84,"proteins_100g":2.8,"fat_100g":1.9,
+                "carbohydrates_100g":13.9,"sugars_100g":1}
+        }""", OffProductDto::class.java).toProduct("4690228106903")
+        assertEquals(NutritionBasis.PER_100_G_OR_ML, mapped.nutrition.basis)
+        val score = com.foodscan.app.domain.scoring.ScoringEngine.evaluate(mapped,
+            com.foodscan.app.domain.model.NutritionScenario.NORMAL) as com.foodscan.app.domain.scoring.ProductScore.Rated
+        assertEquals(85, score.value)
+        assertEquals(5, score.contributions.size)
+        assertEquals(55, score.coveredWeight)
+        assertTrue(score.preliminary)
+        assertTrue(score.generalScale)
+    }
+
+    @Test fun normalizedEnergyAndSodiumAreConvertedOnlyWhenDirectValuesAreMissing() {
+        fun map(nutrients: String) = Gson().fromJson("""{"nutriments":$nutrients}""",
+            OffProductDto::class.java).toProduct("test").nutrition
+        val converted = map("""{"energy-kj_100g":418.4,"sodium_100g":0.4}""")
+        assertEquals(100.0, converted.energyKcal!!, .0001)
+        assertEquals(1.0, converted.saltGrams!!, .0001)
+        assertEquals(100.0, map("""{"energy_100g":418.4}""").energyKcal!!, .0001)
+        val direct = map("""{"energy-kcal_100g":0,"energy-kj_100g":418.4,"salt_100g":0,"sodium_100g":0.4}""")
+        assertEquals(0.0, direct.energyKcal!!, 0.0)
+        assertEquals(0.0, direct.saltGrams!!, 0.0)
+        val inexact = map("""{"energy-kj_100g":418.4,"energy-kj_modifier":"~",
+            "sodium_100g":0.4,"sodium_modifier":"<","energy_serving":100}""")
+        assertNull(inexact.energyKcal)
+        assertNull(inexact.saltGrams)
+    }
 }
