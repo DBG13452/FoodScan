@@ -94,7 +94,7 @@ class PartialProductTest {
         compose.waitForText("Предварительная оценка")
         compose.onNodeWithText("85 / 100").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Учтено показателей: 5 из 8").performScrollTo().assertIsDisplayed()
-        compose.onNodeWithText("Общая шкала: база 100 г / 100 мл не уточнена").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Модель: Еда").performScrollTo().assertIsDisplayed()
         screenshot("yogurt-score")
         compose.onNodeWithText("Почему такая оценка").performScrollTo().performClick()
         compose.onNodeWithText("Известные показатели покрывают 55% веса методики").performScrollTo().assertIsDisplayed()
@@ -105,7 +105,7 @@ class PartialProductTest {
 
     private fun screenshot(name: String) {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val directory = File(context.getExternalFilesDir(null), "foodscan-v3-screenshots").apply { mkdirs() }
+        val directory = File(context.getExternalFilesDir(null), "foodscan-v4-screenshots").apply { mkdirs() }
         File(directory, "$name.png").outputStream().use {
             compose.onRoot().captureToImage().asAndroidBitmap().compress(Bitmap.CompressFormat.PNG, 100, it)
         }

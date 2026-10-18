@@ -50,6 +50,7 @@ internal fun OffProductDto.toProduct(requestedBarcode: String): Product {
             carbohydrateGrams = nutrient("carbohydrates"), sugarGrams = nutrient("sugars"),
             saltGrams = saltGrams, saturatedFatGrams = nutrient("saturated-fat"),
             fiberGrams = nutrient("fiber"),
+            alcoholPercent = nutrient("alcohol")?.takeIf { it <= 100 },
         ),
         ingredients = russianIngredients.clean() ?: ingredients.clean(),
         // An empty API tag array is not proof that allergens or additives are absent.

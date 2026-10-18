@@ -16,6 +16,15 @@ import java.io.IOException
 import java.net.SocketTimeoutException
 
 class OpenFoodFactsRepositoryTest {
+    @Test fun normalizedAlcoholStrengthIsReadWithoutChangingOtherNutrients() {
+        val mapped = Gson().fromJson("""{"product_name":"Beer", "nutriments":{
+            "alcohol_100g":5,"energy-kcal_100g":40,"carbohydrates_100g":3}}
+        """, OffProductDto::class.java).toProduct("beer")
+        assertEquals(5.0, mapped.nutrition.alcoholPercent!!, 0.0)
+        assertEquals(com.foodscan.app.domain.scoring.ScoreProblem.EXCLUDED_CATEGORY,
+            (com.foodscan.app.domain.scoring.ScoringEngine.evaluate(mapped,
+                com.foodscan.app.domain.model.NutritionScenario.NORMAL) as com.foodscan.app.domain.scoring.ProductScore.Insufficient).problem)
+    }
     private lateinit var server: MockWebServer
     private lateinit var repository: OpenFoodFactsRepository
     @Before fun setup() {
@@ -142,7 +151,7 @@ class OpenFoodFactsRepositoryTest {
         assertEquals(5, score.contributions.size)
         assertEquals(55, score.coveredWeight)
         assertTrue(score.preliminary)
-        assertTrue(score.generalScale)
+        assertFalse(score.assumedProfile)
     }
 
     @Test fun normalizedEnergyAndSodiumAreConvertedOnlyWhenDirectValuesAreMissing() {

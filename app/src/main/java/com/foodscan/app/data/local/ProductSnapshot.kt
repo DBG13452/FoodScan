@@ -30,6 +30,7 @@ object ProductSnapshot {
             addProperty("carbs", n.carbohydrateGrams); addProperty("sugar", n.sugarGrams)
             addProperty("salt", n.saltGrams); addProperty("saturated", n.saturatedFatGrams)
             addProperty("fiber", n.fiberGrams)
+            addProperty("alcohol", n.alcoholPercent)
         })
     }.toString()
 
@@ -53,6 +54,7 @@ object ProductSnapshot {
                 proteinGrams = number("protein"), fatGrams = number("fat"), carbohydrateGrams = number("carbs"),
                 sugarGrams = number("sugar"), saltGrams = number("salt"), saturatedFatGrams = number("saturated"),
                 fiberGrams = number("fiber"),
+                alcoholPercent = number("alcohol"),
             ),
         )
     }.getOrNull()

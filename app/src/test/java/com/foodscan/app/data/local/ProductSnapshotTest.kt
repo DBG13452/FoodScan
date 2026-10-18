@@ -17,4 +17,14 @@ class ProductSnapshotTest {
         assertNull(ProductSnapshot.decode("not json"))
         assertNull(ProductSnapshot.decode("{\"version\":77}"))
     }
+    @Test fun alcoholIsPreservedAndOldSnapshotsRemainReadable() {
+        val product = Product("beer", "Beer", null, source = ProductSource.OPEN_FOOD_FACTS,
+            nutrition = Nutrition(alcoholPercent = 5.0))
+        val encoded = ProductSnapshot.encode(product)
+        assertEquals(product, ProductSnapshot.decode(encoded))
+        val old = com.google.gson.JsonParser.parseString(encoded).asJsonObject
+        old.getAsJsonObject("nutrition").remove("alcohol")
+        assertEquals(product.copy(nutrition = product.nutrition.copy(alcoholPercent = null)),
+            ProductSnapshot.decode(old.toString()))
+    }
 }

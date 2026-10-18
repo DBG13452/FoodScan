@@ -35,4 +35,5 @@ data class Nutrition(
     val saltGrams: Double? = null,
     val saturatedFatGrams: Double? = null,
     val fiberGrams: Double? = null,
+    val alcoholPercent: Double? = null,
 )

@@ -69,7 +69,7 @@ class ScoringEngineTest {
         assertEquals(setOf(ScoreFactor.SUGAR, ScoreFactor.SATURATED_FAT, ScoreFactor.SALT, ScoreFactor.FIBER), result.missing)
         assertEquals(100.0, result.contributions.sumOf(result::normalizedWeight), .0001)
         assertEquals(29.2744253, result.contributions.sumOf(result::normalizedPoints), .0001)
-        assertEquals("FoodScan v3", result.version)
+        assertEquals("FoodScan v4", result.version)
         assertNull(ramen.nutrition.sugarGrams)
     }
 
@@ -113,20 +113,23 @@ class ScoringEngineTest {
         assertEquals(25, rated(onlyProtein, NutritionScenario.SPORT).value)
     }
 
-    @Test fun liquidsUseDifferentThresholdsAndUnknownBasisUsesExplicitGeneralScale() {
-        val liquid = product.copy(nutrition = product.nutrition.copy(basis = NutritionBasis.PER_100_ML,
-            energyKcal = 20.0, sugarGrams = 2.5, carbohydrateGrams = 2.5, fatGrams = 1.5,
-            saltGrams = .3, saturatedFatGrams = .75, proteinGrams = 6.0, fiberGrams = 3.0))
-        assertEquals(100, rated(liquid).value)
-        val unknown = product.copy(nutrition = product.nutrition.copy(basis = NutritionBasis.PER_100_G_OR_ML))
-        assertTrue(rated(unknown).generalScale)
+    @Test fun categorySelectsModelBeforePackageUnitAndUnknownTypeIsExplicit() {
+        val drink = product.copy(category = "Juices", nutrition = product.nutrition.copy(
+            basis = NutritionBasis.PER_100_G, energyKcal = 20.0, sugarGrams = 2.5,
+            carbohydrateGrams = 2.5, fatGrams = 1.5, saltGrams = .3, saturatedFatGrams = .75))
+        assertEquals(100, rated(drink).value)
+        assertEquals(ScoreProfile.BEVERAGE, rated(drink).profile)
+        assertFalse(rated(drink).assumedProfile)
+        val unknown = product.copy(category = null, nutrition = product.nutrition.copy(basis = NutritionBasis.PER_100_G_OR_ML))
+        assertTrue(rated(unknown).assumedProfile)
         assertTrue(rated(unknown).preliminary)
         assertEquals(100, rated(unknown).coveredWeight)
         assertEquals(NutritionBasis.PER_100_G_OR_ML, unknown.nutrition.basis)
-        val taggedDrink = liquid.copy(nutrition = liquid.nutrition.copy(basis = NutritionBasis.PER_100_G_OR_ML),
-            categoryTags = listOf("en:beverages"))
-        assertEquals(rated(liquid).value, rated(taggedDrink).value)
-        assertFalse(rated(taggedDrink).generalScale)
+        val tagged = drink.copy(category = null, categoryTags = listOf("en:beverages"))
+        assertEquals(rated(drink).value, rated(tagged).value)
+        val soup = product.copy(category = "Soups", nutrition = product.nutrition.copy(basis = NutritionBasis.PER_100_ML))
+        assertEquals(ScoreProfile.FOOD, rated(soup).profile)
+        assertEquals(rated().value, rated(soup).value)
     }
 
     @Test fun invalidNumbersContradictionsAndExcludedCategoriesAreRejected() {

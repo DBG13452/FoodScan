@@ -19,6 +19,7 @@ import com.foodscan.app.domain.model.Product
 import com.foodscan.app.domain.scoring.ProductScore
 import com.foodscan.app.domain.scoring.ScoreFactor
 import com.foodscan.app.domain.scoring.ScoreProblem
+import com.foodscan.app.domain.scoring.ScoreProfile
 import com.foodscan.app.domain.scoring.ScoringEngine
 import com.foodscan.app.ui.components.FoodScanButton
 import com.foodscan.app.ui.components.FoodScanButtonStyle
@@ -56,6 +57,9 @@ fun ProductScoreCard(product: Product, scenario: NutritionScenario, onMethodolog
         FoodScanSectionTitle(stringResource(R.string.product_score))
         when (score) {
             is ProductScore.Rated -> {
+                val profileName = stringResource(if (score.profile == ScoreProfile.BEVERAGE)
+                    R.string.score_profile_beverage else R.string.score_profile_food)
+                Text(stringResource(R.string.score_profile, profileName), style = MaterialTheme.typography.titleMedium)
                 if (score.preliminary) Text(stringResource(R.string.score_preliminary),
                     style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text("${score.value} / 100", style = MaterialTheme.typography.headlineLarge,
@@ -66,7 +70,7 @@ fun ProductScoreCard(product: Product, scenario: NutritionScenario, onMethodolog
                     })
                 Text(stringResource(R.string.score_coverage, score.contributions.size, score.totalFactors),
                     style = MaterialTheme.typography.titleMedium)
-                if (score.generalScale) Text(stringResource(R.string.score_general_scale),
+                if (score.assumedProfile) Text(stringResource(R.string.score_assumed_profile),
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (score.missing.isNotEmpty()) {
                     Text(stringResource(R.string.score_missing, score.missing.map { factorLabel(it) }.joinToString(", ")),
@@ -75,6 +79,8 @@ fun ProductScoreCard(product: Product, scenario: NutritionScenario, onMethodolog
                 FoodScanButton(stringResource(if (expanded) R.string.score_hide_details else R.string.score_explain),
                     { expanded = !expanded }, style = FoodScanButtonStyle.Text)
                 if (expanded) {
+                    if (score.profile == ScoreProfile.BEVERAGE) Text(stringResource(R.string.score_beverage_explanation),
+                        style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     if (score.preliminary) {
                         Text(stringResource(R.string.score_partial_explanation, score.coveredWeight),
                             style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -92,7 +98,8 @@ fun ProductScoreCard(product: Product, scenario: NutritionScenario, onMethodolog
                 }
             }
             is ProductScore.Insufficient -> {
-                Text(stringResource(R.string.score_insufficient), style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(if (score.problem == ScoreProblem.EXCLUDED_CATEGORY)
+                    R.string.score_not_applicable else R.string.score_insufficient), style = MaterialTheme.typography.titleMedium)
                 Text(if (score.missing.isNotEmpty()) stringResource(R.string.score_missing,
                     score.missing.map { factorLabel(it) }.joinToString(", ")) else stringResource(when (score.problem) {
                     ScoreProblem.UNKNOWN_BASIS -> R.string.score_unknown_basis

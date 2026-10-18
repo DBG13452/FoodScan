@@ -66,14 +66,14 @@ class ProductScreenTest {
         DemoProductRepository.products.forEach { product ->
             compose.onNodeWithText(product.name).performScrollTo().performClick()
             compose.waitForText("Демонстрационный продукт")
-            compose.onNodeWithText("Демонстрационный продукт").assertIsDisplayed()
+            compose.onNodeWithText("Демонстрационный продукт").performScrollTo().assertIsDisplayed()
             compose.runOnIdle {
                 assertEquals(product.id, controller.currentBackStackEntry?.arguments?.getString(ProductDestination.argument))
             }
             restoration.emulateSavedInstanceStateRestore()
             compose.waitForText("Демонстрационный продукт")
-            compose.onNodeWithText(product.name).assertIsDisplayed()
-            compose.onNodeWithText("Назад").performClick()
+            compose.onNodeWithText(product.name).performScrollTo().assertIsDisplayed()
+            compose.onNodeWithText("Назад").performScrollTo().performClick()
             compose.runOnIdle { assertEquals("home", controller.currentDestination?.route) }
         }
         compose.onNodeWithText("Цельнозерновой хлеб").performScrollTo().performClick()
